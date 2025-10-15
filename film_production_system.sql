@@ -259,6 +259,3 @@ DO $$
 -- ==========================================================
 INSERT INTO Payment (AssignID, Amount, PaymentDate, Method)
 SELECT AssignID, 999999, CURRENT_DATE, 'Cash' FROM Assignment LIMIT 1;
--- ==========================================================
--- ✅ END OF FILE
--- ==========================================================
