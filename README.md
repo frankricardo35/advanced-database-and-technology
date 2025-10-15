@@ -1,5 +1,8 @@
 # 🎬 Film Production and Crew Management System (PostgreSQL + UUID)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)](https://www.postgresql.org/)
+[![Built With SQL](https://img.shields.io/badge/Built%20With-SQL-orange)](#)
 
+---
 ## 📖 Overview
 This project implements a **Film Production and Crew Management System** designed to manage multiple film projects, crew members, assignments, schedules, expenses, and payments for a film studio.  
 It includes database triggers, constraints, and a cost breakdown view for effective production planning and budget control.
@@ -46,3 +49,9 @@ cd film-production-system
 open film_production_system.sql
 
 ```
+
+---
+### 👨‍💻 Author
+- **Frank KWIBUKA** 
+- **🎓 RegNo: 216128218**
+
