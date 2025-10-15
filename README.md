@@ -41,5 +41,8 @@ It includes database triggers, constraints, and a cost breakdown view for effect
 
 ### 1️⃣ Clone Repository
 ```bash
-git clone https://github.com/<frankricardo35>/Film-Production-and-Crew-Management-System.git
+git clone https://github.com/frankricardo35/Film-Production-and-Crew-Management-System.git
 cd film-production-system
+open film_production_system.sql
+
+```
