@@ -51,7 +51,9 @@ open film_production_system.sql
 ```
 
 ---
-### 👨‍💻 Author
+## 👨‍💻 Author
+
+
 - **Frank KWIBUKA** 
 - **🎓 RegNo: 216128218**
 
