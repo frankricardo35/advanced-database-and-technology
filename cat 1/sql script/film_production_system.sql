@@ -39,8 +39,8 @@ CREATE TABLE Crew (
 -- ASSIGNMENT TABLE
 CREATE TABLE Assignment (
                             AssignID UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                            ProjectID UUID REFERENCES Project(ProjectID) ON DELETE CASCADE,
-                            CrewID UUID REFERENCES Crew(CrewID) ON DELETE CASCADE,
+                            ProjectID UUID REFERENCES Project(ProjectID),
+                            CrewID UUID REFERENCES Crew(CrewID),
                             StartDate DATE,
                             EndDate DATE,
                             DailyRate NUMERIC(10,2) CHECK (DailyRate > 0)
@@ -49,7 +49,7 @@ CREATE TABLE Assignment (
 -- SCHEDULE TABLE
 CREATE TABLE Schedule (
                           ScheduleID UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                          ProjectID UUID REFERENCES Project(ProjectID) ON DELETE CASCADE,
+                          ProjectID UUID REFERENCES Project(ProjectID),
                           Scene VARCHAR(100),
                           Location VARCHAR(100),
                           ShootDate DATE,
@@ -59,7 +59,7 @@ CREATE TABLE Schedule (
 -- EXPENSE TABLE
 CREATE TABLE Expense (
                          ExpenseID UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                         ProjectID UUID REFERENCES Project(ProjectID) ON DELETE CASCADE,
+                         ProjectID UUID REFERENCES Project(ProjectID),
                          Description TEXT,
                          Amount NUMERIC(10,2) CHECK (Amount > 0),
                          DateIncurred DATE DEFAULT CURRENT_DATE
@@ -149,6 +149,39 @@ INSERT INTO Expense (ProjectID, Description, Amount, DateIncurred) VALUES
                                                                        (p2, 'Lighting equipment', 7000, '2025-02-20'),
                                                                        (p3, 'Sound system', 4000, '2025-03-25');
 END $$;
+-- ==========================================================
+-- 3️⃣-c INSERT SAMPLE SCHEDULES
+-- ==========================================================
+DO $$
+    DECLARE
+        p1 UUID;
+        p2 UUID;
+        p3 UUID;
+    BEGIN
+        -- Fetch project UUIDs dynamically
+        SELECT ProjectID INTO p1 FROM Project WHERE Title = 'Echoes of Kigali';
+        SELECT ProjectID INTO p2 FROM Project WHERE Title = 'Shadows of the Hills';
+        SELECT ProjectID INTO p3 FROM Project WHERE Title = 'The Rising Drum';
+
+        -- Insert schedules for "Echoes of Kigali"
+        INSERT INTO Schedule (ProjectID, Scene, Location, ShootDate, Status) VALUES
+                                                                                 (p1, 'Opening Scene - Kigali Aerial Shot', 'Kigali Convention Center', '2025-01-12', 'Completed'),
+                                                                                 (p1, 'Market Scene - Nyamirambo', 'Nyamirambo Market', '2025-01-20', 'Completed'),
+                                                                                 (p1, 'Evening Dialogue', 'Rebero Hills', '2025-01-28', 'Completed');
+
+        -- Insert schedules for "Shadows of the Hills"
+        INSERT INTO Schedule (ProjectID, Scene, Location, ShootDate, Status) VALUES
+                                                                                 (p2, 'Village Introduction', 'Musanze Hills', '2025-02-15', 'Ongoing'),
+                                                                                 (p2, 'Family Dinner', 'Musanze Homestead', '2025-02-25', 'Ongoing'),
+                                                                                 (p2, 'Storm Sequence', 'Volcanoes National Park', '2025-03-05', 'Planned');
+
+        -- Insert schedules for "The Rising Drum"
+        INSERT INTO Schedule (ProjectID, Scene, Location, ShootDate, Status) VALUES
+                                                                                 (p3, 'Concert Performance', 'Amahoro Stadium', '2025-03-25', 'Planned'),
+                                                                                 (p3, 'Backstage Rehearsal', 'Kigali Cultural Center', '2025-04-10', 'Planned'),
+                                                                                 (p3, 'Closing Ceremony', 'BK Arena', '2025-05-05', 'Planned');
+    END $$;
+
 
 -- ==========================================================
 --  VIEW FOR COST BREAKDOWN BY FILM
