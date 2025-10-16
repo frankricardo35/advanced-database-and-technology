@@ -5,7 +5,7 @@
 -- RegNo: 216128218
 -- ==========================================================
 
--- 1️⃣ CREATE DATABASE
+-- CREATE DATABASE
 DROP DATABASE IF EXISTS film_production_db;
 CREATE DATABASE film_production_db;
 \c film_production_db;
@@ -14,7 +14,7 @@ CREATE DATABASE film_production_db;
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ==========================================================
--- 2️⃣ TABLE DEFINITIONS
+-- TABLE DEFINITIONS
 -- ==========================================================
 
 -- PROJECT TABLE
@@ -75,7 +75,7 @@ CREATE TABLE Payment (
 );
 
 -- ==========================================================
--- 3️⃣ SAMPLE DATA
+-- SAMPLE DATA
 -- ==========================================================
 
 -- INSERT SAMPLE PROJECTS
@@ -151,23 +151,23 @@ INSERT INTO Expense (ProjectID, Description, Amount, DateIncurred) VALUES
 END $$;
 
 -- ==========================================================
--- 4️⃣ VIEW FOR COST BREAKDOWN BY FILM
+--  VIEW FOR COST BREAKDOWN BY FILM
 -- ==========================================================
 
 CREATE OR REPLACE VIEW FilmCostBreakdown AS
 SELECT
-    p.Title,
-    COALESCE(SUM(e.Amount), 0) AS TotalExpenses,
-    COALESCE(SUM(pay.Amount), 0) AS TotalPayments,
-    p.Budget AS RemainingBudget
+    p.title,
+    COALESCE(SUM(e.amount), 0) AS TotalExpenses,
+    COALESCE(SUM(pay.amount), 0) AS TotalPayments,
+    p.budget AS RemainingBudget
 FROM Project p
-         LEFT JOIN Expense e ON p.ProjectID = e.ProjectID
-         LEFT JOIN Assignment a ON p.ProjectID = a.ProjectID
-         LEFT JOIN Payment pay ON a.AssignID = pay.AssignID
-GROUP BY p.ProjectID, p.Title, p.Budget;
+         LEFT JOIN Expense e ON p.projectid = e.projectid
+         LEFT JOIN Assignment a ON p.projectid = a.projectid
+         LEFT JOIN Payment pay ON a.assignid = pay.assignid
+GROUP BY p.projectid, p.title, p.budget;
 
 -- ==========================================================
--- 5️⃣ TRIGGERS
+-- TRIGGERS
 -- ==========================================================
 
 -- (a) UPDATE PROJECT BUDGET AFTER INSERTING EXPENSE
@@ -175,8 +175,8 @@ CREATE OR REPLACE FUNCTION update_project_budget()
 RETURNS TRIGGER AS $$
 BEGIN
 UPDATE Project
-SET Budget = Budget - NEW.Amount
-WHERE ProjectID = NEW.ProjectID;
+SET budget = project.budget - NEW.amount
+WHERE project.projectid = NEW.projectid;
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -212,7 +212,7 @@ CREATE TRIGGER trg_prevent_overpayment
     EXECUTE FUNCTION prevent_overpayment();
 
 -- ==========================================================
--- 6️⃣ TEST QUERIES (OPTIONAL)
+-- TEST QUERIES (OPTIONAL)
 -- ==========================================================
 
 -- Retrieve total expenses per film
