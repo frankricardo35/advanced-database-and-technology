@@ -1,71 +1,77 @@
-# 🎬 Film Production & Crew Management System (Oracle 19c)
+# 🎬 Film Production and Crew Management System
+## ⚙️ Parallel & Distributed Database Queries (Oracle 19c)
 
 [![Oracle SQL](https://img.shields.io/badge/Database-Oracle%2019c-red?logo=oracle&logoColor=white)](https://www.oracle.com/database/)
 [![SQL Developer](https://img.shields.io/badge/Tool-SQL%20Developer-blue?logo=databricks&logoColor=white)](https://www.oracle.com/tools/downloads/sqldev-downloads.html)
-[![License](https://img.shields.io/badge/License-Academic--Use-lightgrey)](#)
-[![Language](https://img.shields.io/badge/Language-SQL-green)](#)
-
-**Author:** Frank KWIBUKA  
-**Reg. No:** 216128218  
-**Course:** Advanced Database Systems (Practical Lab)  
-**Institution:** [Add your institution name here]  
-**Semester:** 2025
+[![Topic](https://img.shields.io/badge/Focus-Parallel%20%26%20Distributed%20Databases-green)](#)
+[![Author](https://img.shields.io/badge/Author-Frank%20Ricardo%20(216128218)-lightgrey)](#)
 
 ---
 
-## 📖 Overview
+## 🎯 Purpose
 
-This project implements a **Film Production & Crew Management System** designed for academic demonstration of **advanced database concepts** using **Oracle 19c**.  
-It simulates a real-world film studio environment where multiple film projects, crew members, assignments, expenses, and payments are managed while enforcing **budget constraints, data integrity, and distributed transaction control**.
+This lab demonstrates **advanced Oracle 19c database features** in **Parallel and Distributed Query Processing** using the *Film Production & Crew Management System* schema.
 
-The script is structured to support **hands-on exercises** in:
-- SQL schema design
-- Constraints and triggers
-- Views and analytical queries
-- Parallel query processing
-- Distributed databases (using database links)
-- Concurrency control and two-phase commit (2PC)
+It extends the centralized database to simulate **multi-branch data distribution**, **remote database access**, **parallelism**, and **transaction atomicity** via **two-phase commit (2PC)**.
 
 ---
 
-## 🧱 Database Schema
+## 🧩 Learning Objectives
 
-### Core Entities
-
-| Table | Description |
-|--------|-------------|
-| **Project** | Stores film projects, directors, and budgets. |
-| **Crew** | Contains crew member details, roles, and experience. |
-| **Assignment** | Links crew members to projects with start/end dates and daily rates. |
-| **Schedule** | Manages shooting schedules and scene tracking. |
-| **Expense** | Records expenses and automatically updates project budget. |
-| **Payment** | Stores payments made to crew assignments and validates against remaining project budgets. |
+By completing this exercise, students will:
+1. Understand **data fragmentation and replication** across distributed schemas.
+2. Use **Oracle Database Links** for remote joins and queries.
+3. Simulate **Two-Phase Commit (2PC)** to ensure atomic distributed transactions.
+4. Explore **Parallel Query Execution** for improved performance.
+5. Observe **Concurrency Control & Lock Management** in multi-user environments.
+6. Benchmark **Serial vs Parallel vs Distributed** performance using AUTOTRACE.
 
 ---
 
-## ⚙️ Key Constraints & Triggers
+## 🏗️ Environment Setup
 
-### ✅ Constraints
-- `CK_PRJ_DATES`: Ensures `EndDate ≥ StartDate`.
-- `CK_PRJ_BUDGET`: Prevents negative budgets.
-- `CK_CREW_EXP`: Disallows negative experience years.
-- `CK_ASS_RATE`: Enforces non-negative daily rates.
-
-### ⚡ Triggers
-| Trigger | Description |
-|----------|-------------|
-| `TRG_EXPENSE_UPDATE_BUDGET` | Automatically decreases project budget when a new expense is added. Prevents overspending. |
-| `TRG_PAYMENT_BUDGET_GUARD` | Ensures no payment exceeds remaining budget and updates the project’s remaining funds. |
+| Component | Description |
+|------------|-------------|
+| **Central Schema** | Main film production database (`FilmDB`) |
+| **BranchDB_A** | Stores odd-numbered project and crew data |
+| **BranchDB_B** | Stores even-numbered project and crew data |
+| **Database Link** | `DBLINK_TO_B` connects `BranchDB_A` to `BranchDB_B` |
+| **Oracle Version** | Oracle Database 19c or higher |
+| **Tools Used** | SQL*Plus / Oracle SQL Developer |
 
 ---
 
-## 👁️ View: `VW_FILM_COST_BREAKDOWN`
+## 🗺️ Architecture Diagram
 
-A consolidated view that provides a **cost summary per project**, including:
-- Total assignment cost (days × daily rate)
-- Total expenses
-- Total payments
-- Remaining project budget
+```mermaid
+flowchart LR
+    subgraph FilmDB["🎬 Central Schema (Film Production System)"]
+        P[Project Table]
+        C[Crew Table]
+        A[Assignment Table]
+        S[Schedule Table]
+        E[Expense Table]
+    end
 
-```sql
-SELECT * FROM VW_FILM_COST_BREAKDOWN ORDER BY ProjectID;
+    subgraph BranchDB_A["🏢 BranchDB_A (Odd Fragments)"]
+        PA[Project_A]
+        CA[Crew_A]
+    end
+
+    subgraph BranchDB_B["🏢 BranchDB_B (Even Fragments)"]
+        PB[Project_B]
+        CB[Crew_B]
+    end
+
+    P -->|Horizontal Fragmentation| PA
+    P -->|Horizontal Fragmentation| PB
+
+    PA <-->|DBLINK_TO_B| PB
+    CA <-->|DBLINK_TO_B| CB
+
+    classDef central fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#000,font-weight:bold;
+    classDef branch fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#000,font-weight:bold;
+    classDef link fill:#e2e8f0,stroke:#94a3b8,stroke-width:1px,color:#111;
+
+    class FilmDB central;
+    class BranchDB_A,BranchDB_B branch;
