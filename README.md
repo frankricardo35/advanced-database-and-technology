@@ -1,59 +1,71 @@
-# 🎬 Film Production and Crew Management System (PostgreSQL + UUID)
-[![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)](https://www.postgresql.org/)
-[![Built With SQL](https://img.shields.io/badge/Built%20With-SQL-orange)](#)
+# 🎬 Film Production & Crew Management System (Oracle 19c)
+
+[![Oracle SQL](https://img.shields.io/badge/Database-Oracle%2019c-red?logo=oracle&logoColor=white)](https://www.oracle.com/database/)
+[![SQL Developer](https://img.shields.io/badge/Tool-SQL%20Developer-blue?logo=databricks&logoColor=white)](https://www.oracle.com/tools/downloads/sqldev-downloads.html)
+[![License](https://img.shields.io/badge/License-Academic--Use-lightgrey)](#)
+[![Language](https://img.shields.io/badge/Language-SQL-green)](#)
+
+**Author:** Frank KWIBUKA  
+**Reg. No:** 216128218  
+**Course:** Advanced Database Systems (Practical Lab)  
+**Institution:** [Add your institution name here]  
+**Semester:** 2025
 
 ---
+
 ## 📖 Overview
-This project implements a **Film Production and Crew Management System** designed to manage multiple film projects, crew members, assignments, schedules, expenses, and payments for a film studio.  
-It includes database triggers, constraints, and a cost breakdown view for effective production planning and budget control.
 
----
+This project implements a **Film Production & Crew Management System** designed for academic demonstration of **advanced database concepts** using **Oracle 19c**.  
+It simulates a real-world film studio environment where multiple film projects, crew members, assignments, expenses, and payments are managed while enforcing **budget constraints, data integrity, and distributed transaction control**.
 
-## 🧩 Features
-✅ Manage multiple **film projects** with budgets and directors.  
-✅ Track **crew members**, roles, and experience.  
-✅ Assign crew to projects with dates and daily rates.  
-✅ Manage **shooting schedules** and scene tracking.  
-✅ Record **expenses** and automatically update project budgets.  
-✅ Handle **crew payments** with built-in budget validation.  
-✅ Generate a **cost breakdown view** for each film project.
+The script is structured to support **hands-on exercises** in:
+- SQL schema design
+- Constraints and triggers
+- Views and analytical queries
+- Parallel query processing
+- Distributed databases (using database links)
+- Concurrency control and two-phase commit (2PC)
 
 ---
 
 ## 🧱 Database Schema
 
+### Core Entities
+
 | Table | Description |
 |--------|-------------|
-| `Project` | Stores film project details and budget information. |
-| `Crew` | Stores crew member details, roles, and experience. |
-| `Assignment` | Links crew members to film projects. |
-| `Schedule` | Manages film scenes, locations, and shooting status. |
-| `Expense` | Records project expenses and triggers automatic budget updates. |
-| `Payment` | Handles crew payments with validation against remaining budget. |
-
-### Relationships
-- **Project → Assignment** (1:N)
-- **Crew → Assignment** (1:N)
-- **Project → Schedule** (1:N)
-- **Project → Expense** (1:N)
-- **Assignment → Payment** (1:1, with CASCADE DELETE)
+| **Project** | Stores film projects, directors, and budgets. |
+| **Crew** | Contains crew member details, roles, and experience. |
+| **Assignment** | Links crew members to projects with start/end dates and daily rates. |
+| **Schedule** | Manages shooting schedules and scene tracking. |
+| **Expense** | Records expenses and automatically updates project budget. |
+| **Payment** | Stores payments made to crew assignments and validates against remaining project budgets. |
 
 ---
 
-## 🛠️ Setup Instructions
+## ⚙️ Key Constraints & Triggers
 
-### 1️⃣ Clone Repository
-```bash
-git clone https://github.com/frankricardo35/Film-Production-and-Crew-Management-System.git
-cd film-production-system
-open cd cat1/sql script film_production_system.sql
+### ✅ Constraints
+- `CK_PRJ_DATES`: Ensures `EndDate ≥ StartDate`.
+- `CK_PRJ_BUDGET`: Prevents negative budgets.
+- `CK_CREW_EXP`: Disallows negative experience years.
+- `CK_ASS_RATE`: Enforces non-negative daily rates.
 
-```
+### ⚡ Triggers
+| Trigger | Description |
+|----------|-------------|
+| `TRG_EXPENSE_UPDATE_BUDGET` | Automatically decreases project budget when a new expense is added. Prevents overspending. |
+| `TRG_PAYMENT_BUDGET_GUARD` | Ensures no payment exceeds remaining budget and updates the project’s remaining funds. |
 
 ---
-## 👨‍💻 Author
 
+## 👁️ View: `VW_FILM_COST_BREAKDOWN`
 
-- **Frank KWIBUKA** 
-- **🎓 RegNo: 216128218**
+A consolidated view that provides a **cost summary per project**, including:
+- Total assignment cost (days × daily rate)
+- Total expenses
+- Total payments
+- Remaining project budget
 
+```sql
+SELECT * FROM VW_FILM_COST_BREAKDOWN ORDER BY ProjectID;
