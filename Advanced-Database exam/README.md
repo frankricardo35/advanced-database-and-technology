@@ -23,6 +23,7 @@ consistency across two database nodes:
 A **Database Link** enables cross-node joins, distributed transactions, and consistency operations.
 
 ---
+## 🏗 System Architecture
 ```mermaid
 flowchart TB
 
@@ -45,28 +46,7 @@ flowchart TB
     C -->|"DATABASE LINK: proj_link"| D
 
 ```
-## 🏗 System Architecture
 
-```mermaid
-                   ┌────────────────────┐
-                   │ FILM_PRODUCTION DB │
-                   │  (Original Source) │
-                   └──────┬─────────────┘
-                          │ SELECT Privileges
-            ┌─────────────┴─────────────┐
-            │                           │
- ┌──────────▼─────────┐       ┌─────────▼──────────┐
- │   BranchDB_A       │       │   BranchDB_B        │
- │  Expense_A (ODD)   │       │  Expense_B (EVEN)   │
- └─────────┬──────────┘       └─────────┬───────────┘
-           │ DATABASE LINK (proj_link)   │
-           └───────────────┬─────────────┘
-                           ▼
-                 ┌───────────────────┐
-                 │   Expense_ALL     │
-                 │ (Unified View)    │
-                 └───────────────────┘
-```
 
 ## ✅ Tasks
 
