@@ -1,12 +1,12 @@
 # 🎬 FILM PRODUCTION & CREW MANAGEMENT SYSTEM
-
+[![Oracle SQL](https://img.shields.io/badge/Database-Oracle%2019c-red?logo=oracle&logoColor=white)](https://www.oracle.com/database/)
+[![SQL Developer](https://img.shields.io/badge/Tool-SQL%20Developer-blue?logo=databricks&logoColor=white)](https://www.oracle.com/tools/downloads/sqldev-downloads.html)
 ### **Advanced Database Project-Based Final Exam (Oracle 19c)**
 
-**Course:** Parallel & Distributed Database Systems  
+**Course:** Advanced Database  
 **Student:** _Frank KWIBUKA_  
 **Reg No:** _216 128 218_  
-**Institution:** _University of Rwanda / AFRICAN CENTRE OF EXCELLENCE IN DATA SCIENCE (ACE-DS) _
-**Academic Year:** 2025/2026
+**Institution:** University of Rwanda / AFRICAN CENTRE OF EXCELLENCE IN DATA SCIENCE (ACE-DS)
 
 ---
 
@@ -75,7 +75,13 @@ SELECT *
 FROM FILM_PRODUCTION.EXPENSE
 WHERE MOD(EXPENSEID, 2) = 0;
 ```
+#### Explanation 
+- This creates a new table Expense_A in BranchDB_A.
+- Only rows where ExpenseID is odd are copied on BranchDB_A .
+- Rows with even-numbered ExpenseID values are stored on BranchDB_B 
+- This is part of horizontal fragmentation, where data is split based on a rule.
 
+#### Screenshots
 ![original Expense table](./screenshots/original_Expense_table.png)
 
 #### original expense table
@@ -110,9 +116,17 @@ SELECT (SELECT COUNT(*) FROM Expense_A)           AS CNT_A,
        (SELECT COUNT(*) FROM Expense_ALL)         AS CNT_ALL
 FROM dual;
 ```
-
+### Explanation 
+- This view for first query rebuilds the original Expense table without physically merging the data.
+- Expense_B@proj_link accesses the fragment stored on BranchDB_B using a database link.
+- UNION ALL ensures all rows are included, without removing duplicates.
+- We compare row counts to ensure no data was lost during fragmentation.
+- If CNT_ALL = CNT_A + CNT_B, the recombined view is consistent and correct.
+### Screenshots
 ![all_Expense_view.png](screenshots/all_Expense_view.png)
 ![count_validation.png](screenshots/count_validation.png)
+
+
 
 ## **A2: Database Link & Cross-Node Join**
 
@@ -127,22 +141,26 @@ DATABASE LINK proj_link
     CONNECT TO BranchDB_B IDENTIFIED BY "B_pwd1"
     USING '//localhost:1521/XE';
 ```
-
+### Explanation
+- This establishes communication between the two schemas.
+- It allows BranchDB_A to query tables in BranchDB_B just like local tables.
+### Screenshots
 ![create_database_link.png](screenshots/create_database_link.png)
 
--
-    2. Run remote SELECT on Project@proj_link showing up to 5 sample rows.
+- 2. Run remote SELECT on Project@proj_link showing up to 5 sample rows.
 
 ```sql
 -- Run remote SELECT on Project@proj_link showing up to 5 sample rows.
 SELECT COUNT(*) AS project_rows_in_B
 FROM Project_B@DBLINK_TO_B;
 ```
-
+### Explanation
+- We test that the link is working by counting rows in a remote table.
+- If a number appears, the connection is successful.
+### Screenshots
 ![count_from_database_link.png](screenshots/count_from_database_link.png)
 
--
-    3. Run a distributed join: local Expense_A (or base Expense) joined with remote Assignment@proj_link returning3. Run
+-3. Run a distributed join: local Expense_A (or base Expense) joined with remote Assignment@proj_link returning3. Run
        a distributed join: local Expense_A (or base Expense) joined with remote Assignment@proj_link returning
 
 ```sql
@@ -156,20 +174,25 @@ FROM Expense_A e
          JOIN Assignment@proj_link a
               ON e.ProjectID = a.ProjectID;
 ```
-
+### Explanation
+- This query joins data from two different database nodes.
+- The join condition is on ProjectID, which exists in both tables.
+- This demonstrates distributed query processing across nodes.
+### Screenshots
 ![distributed_join.png](screenshots/distributed_join.png)
 
 ## **A3: Parallel vs Serial Aggregation (≤10 rows data)**
 
--
-    1. Run a SERIAL aggregation on Expense_ALL over the small dataset
+- 1. Run a SERIAL aggregation on Expense_ALL over the small dataset
 
 ```sql
 SELECT ProjectID, SUM(Amount) AS total_amt
 FROM Expense_ALL
 GROUP BY ProjectID;
 ```
-
+### Explanation
+- This calculates total expenses per project in standard (single process) mode.
+### Screenshots
 ![serial_aggregation.png](screenshots/serial_aggregation.png)
 
 -
@@ -183,7 +206,10 @@ SELECT /*+ PARALLEL(Expense_A,8) PARALLEL(Expense_B,8) */
 FROM Expense_ALL
 GROUP BY ProjectID;
 ```
-
+### Explanation
+- Here we force Oracle to use multiple execution processes (parallel workers).
+- Even though the dataset is small, this demonstrates parallel execution behavior.
+### Screenshots
 ![parallel_aggregation.png](screenshots/parallel_aggregation.png)
 
 -
@@ -204,7 +230,10 @@ FROM Expense_ALL bs;
 SELECT *
 FROM TABLE(DBMS_XPLAN.DISPLAY);
 ```
-
+### Explanation
+- We compare how Oracle planned and executed the serial vs parallel queries.
+- Because the dataset is small, performance gain is low — but the execution strategy still differs.
+### Screenshots
 ![execution_paln.png](screenshots/execution_paln.png)
 
 -
@@ -214,7 +243,9 @@ FROM TABLE(DBMS_XPLAN.DISPLAY);
 SELECT *
 FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(NULL, NULL, 'ALLSTATS LAST'));
 ```
-
+### Explanation
+- Shows actual runtime statistics, helping verify whether parallelization was really used.
+### Screenshots
 ![comparison.png](screenshots/comparison.png)
 
 ## **A4: Two-Phase Commit & Recovery (2 rows)**
@@ -233,7 +264,11 @@ COMMIT;
 END;
 /
 ```
-
+### Explanation
+- This inserts one new record locally (Expense_A on Node A) and one remotely (Expense_B on Node B).
+- The COMMIT is managed using a two-phase commit, ensuring both inserts succeed together.
+- If one fails, both are rolled back to maintain consistency across nodes.
+### Screenshots
 ![two_phase_commit.png](screenshots/two_phase_commit.png)
 
 -
@@ -256,7 +291,12 @@ SELECT *
 FROM DBA_2PC_PENDING
 WHERE LOCAL_TRAN_ID LIKE '%';
 ```
-
+### Explanation
+- This is the same operation as before.
+- If we intentionally cause a failure during one of the inserts, Oracle will place the transaction in an in-doubt state
+- DBA_2PC_PENDING shows unresolved distributed transactions.
+- Administrators can later issue COMMIT FORCE or ROLLBACK FORCE to complete or undo it.
+### Screenshots
 ![pending_commit.png](screenshots/pending_commit.png)
 
 ## **A5: Distributed Lock Conflict & Diagnosis (no extra rows)**
@@ -278,7 +318,10 @@ SELECT sid, type, lmode, request, id1, id2, block
 FROM v$lock
 WHERE type = 'TX';
 ```
-
+### Explanation
+- Two different database sessions try to update the same logical row – one remotely through the database link and one locally.
+- Because Oracle locks rows during updates, the second session waits, creating a distributed row-level lock.
+### Screenshots
 ![open_session.png](screenshots/open_session.png)
 
 -
@@ -304,7 +347,14 @@ ALTER TABLE Project
 ALTER TABLE Project
     ADD CONSTRAINT chk_date_order CHECK (StartDate <= EndDate);
 ```
-
+### Explanation
+- These rules prevent invalid data:
+   - Expense amounts can’t be negative
+   - Expense dates can’t be before January 2024
+   - Project budgets must be positive
+   - A project must start before it ends
+- Oracle will now reject any data that breaks these conditions.
+### Screenshots
 ![constraints.png](screenshots/constraints.png)
 
 -
@@ -367,7 +417,11 @@ END;
 ('✅ All invalid cases failed as expected.');
 END;
 ```
-
+### Explanation
+- Each invalid INSERT is wrapped in a BEGIN…EXCEPTION…END block
+- This allows testing constraints without inserting bad data into the table.
+- ROLLBACK ensures the database stays clean.
+### Screenshots
 ![roll_back.png](screenshots/roll_back.png)
 
 -
@@ -390,7 +444,10 @@ CREATE TABLE Project_AUDIT
     key_col    VARCHAR2(64)
 );
 ```
-
+### Explanation
+- This table records before and after totals when Expense values change.
+- It helps trace when and how project budget totals are recalculated.
+### Screenshots
 ![create_audit_table.png](screenshots/create_audit_table.png)
 
 -
@@ -421,7 +478,10 @@ INSERT INTO Project_AUDIT
 VALUES (v_before, v_after, SYSTIMESTAMP, 'Expense_A');
 END;
 ```
-
+### Explanation
+- This trigger runs automatically whenever Expense data changes.
+- It recalculates Project budgets based on Expense totals.
+### Screenshots
 ![statement_level_trigger.png](screenshots/statement_level_trigger.png)
 
 -
@@ -441,7 +501,10 @@ COMMIT;
 SELECT *
 FROM Project_AUDIT;
 ```
-
+### Explanation
+- The change is logged into Project_AUDIT for traceability.
+- The table shows record inserted before and after of insert
+### Screenshots
 ![autid_verify_1.png](screenshots/autid_verify_1.png)
 ![audit_verify_2.png](screenshots/audit_verify_2.png)
 
@@ -459,7 +522,10 @@ CREATE TABLE HIER
     child_id  NUMBER
 );
 ```
-
+### Explanation
+- This table represents a simple hierarchy (like parent → child relationships).
+- Useful for grouping or structured reporting.
+### Screenshots
 ![create_hier_table.png](screenshots/create_hier_table.png)
 ![select_heir_table.png](screenshots/select_heir_table.png)
 
@@ -480,7 +546,11 @@ FROM roll r
          JOIN Expense_A e ON e.ProjectID = r.child_id
     FETCH FIRST 10 ROWS ONLY;
 ```
-
+### Explanation
+- The recursive CTE walks the hierarchy level by level.
+- It assigns each node a root and depth.
+- Then we join it with Expense_A to attach financial values to each level.
+### Screenshots
 ![heir_recursive.png](screenshots/heir_recursive.png)
 
 ## **B9: Mini-Knowledge Base with Transitive Inference (≤10 facts)**
@@ -496,7 +566,10 @@ CREATE TABLE TRIPLE
     o VARCHAR2(64)
 );
 ```
-
+### Explanation
+- s, p, and o represent subject, predicate, and object.
+- Allows simple reasoning like: Camera isA Equipment → Equipment isA Asset. 
+### Screenshots
 ![create_triple.png](screenshots/create_triple.png)
 
 -
@@ -517,7 +590,9 @@ COMMIT;
 select *
 from TRIPLE
 ```
-
+### Explanation
+- This shows the process of inserting data into TRIPLE
+### Screenshots
 ![select_triple_table.png](screenshots/select_triple_table.png)
 
 -
@@ -535,7 +610,10 @@ WITH isa(s, o) AS (SELECT s, o
 SELECT DISTINCT s AS item, o AS inferred_type
 FROM isa;
 ```
-
+### Explanation
+- This recursive query continues applying isA rules to infer higher-level classifications.
+- It shows how database logic can mimic basic reasoning.
+### Screenshots
 ![triple_recursive.png](screenshots/triple_recursive.png)
 
 ## **B10: Business Limit Alert (Function + Trigger) (row-budget safe)**
@@ -555,7 +633,10 @@ INSERT INTO BUSINESS_LIMITS
 VALUES ('MAX_EXPENSE', 500, 'Y');
 COMMIT;
 ```
-
+### Explanation
+- This stores the maximum allowed expense amount.
+- Setting it in a table makes the limit easy to update without changing triggers.
+### Screenshots
 ![create_business_limit.png](screenshots/create_business_limit.png)
 
 -
@@ -596,11 +677,13 @@ fn_should_alert(:NEW.Amount)=1 THEN
 END IF;
 END;
 ```
-
+### Explanation
+- This trigger blocks inserting or updating any expense that is too high.
+- The error message tells the user what went wrong.
+### Screenshots
 ![before_insert_trigger.png](screenshots/before_insert_trigger.png)
 
--
-    4. Demonstrate 2 failing and 2 passing DML cases; rollback the failing ones so total committed rows remain within
+- 4. Demonstrate 2 failing and 2 passing DML cases; rollback the failing ones so total committed rows remain within
        the ≤10 budget.
 
 ```sql
@@ -618,6 +701,9 @@ COMMIT;
 SELECT *
 FROM Expense;
 ```
-
+### Explanation
+- First query will fail because the amount exceeds 500.
+- Second query will succeed because the amount is within allowed range.
+### Screenshots
 ![fail_rollback.png](screenshots/fail_rollback.png)
 
