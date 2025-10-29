@@ -22,14 +22,39 @@ It showcases SQL design, performance optimization, distributed database simulati
 ```bash
 Advanced-Database-Systems/
 │
-├── cat 1/                            # Continuous Assessment Test (PostgreSQL)
-│   ├── screenshots/                  # Query outputs and ERD screenshots
-│   ├── film_production_system.sql    # CAT SQL script (PostgreSQL)
-│   ├── README.md                     # CAT documentation
+├── cat 1/                                # Continuous Assessment Test (PostgreSQL)
+│   ├── screenshots/                      
+│   ├── film_production_system.sql        
+│   ├── README.md                         
 │
-├── lab/                               # Practical Lab Work (Oracle 19c)
-│   ├── lab_script.sql                 # Full Oracle SQL script (Parallel & Distributed DB)
-│   ├── lab_report.pdf                 # Formal lab report submission
-│   ├── README.md                      # Lab documentation
+├── lab/                                   # Practical Lab Work (Oracle 19c)
+│   ├── lab_script.sql                     
+│   ├── lab_report.pdf                     
+│   ├── README.md                          
 │
-└── README.md                          # (You are here) Parent README
+├── Advanced-Database-Exam/                # NEW - Final Exam Practical
+│   ├── code/                              # All SQL procedures, triggers, views, scripts
+│   │   ├── script.sql
+│   │   ├── README.md                      #Explains all work done and screen reference to screenshot for the results of query
+│   │   
+│   │
+│   ├── screenshots/                       # Output results screenshots
+│   │   ├── all_Expense_view.png
+│   │   ├── audit_verify_2.png
+│   │   ├── two_phase_commit.png
+│   │   └── etc...
+│   │
+│   ├── README.md                          # Documentation for the exam project
+│
+├── Intelligence-Database/                  # Intelligence-Database lab
+│   ├── 01_rule.sql
+│   ├── 02_triggers.sql
+│   ├── 03_recursive_with.sql
+│   ├── 04_ontology.sql
+│   ├── 05_spatial.sql
+│   │
+│   ├── Intelligence%20Databases-Assignments.pdf               # (1 PDF tha contains report)
+│   ├── README.md                          # Description, explanation & instructions
+│
+└── README.md                              # Parent architecture overview
+
