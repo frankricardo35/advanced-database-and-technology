@@ -20,15 +20,31 @@ recursive queries, inference rules, and trigger-based automation.**
 The primary dataset revolves around **Projects**, **Expenses**, and **Crew Assignments**, while ensuring distributed
 consistency across two database nodes:
 
-| Node       | Schema    | Fragment                      |
-|------------|-----------|-------------------------------|
-| BranchDB_A | Expense_A | Odd-numbered Expense records  |
-| BranchDB_B | Expense_B | Even-numbered Expense records |
-
 A **Database Link** enables cross-node joins, distributed transactions, and consistency operations.
 
 ---
+```mermaid
+flowchart TB
 
+    %% Main Source Database
+    A["FILM_PRODUCTION DB<br/>(Original Source)"]
+
+    %% Branch Nodes (Fragments)
+    B["BranchDB_A<br/>Table: Expense_A<br/>(Odd ExpenseID Rows)"]
+    C["BranchDB_B<br/>Table: Expense_B<br/>(Even ExpenseID Rows)"]
+
+    %% Unified Logical View
+    D["Expense_ALL<br/>(Recombined Distributed View)"]
+
+    %% Privilege Distribution
+    A -->|"GRANT SELECT"| B
+    A -->|"GRANT SELECT"| C
+
+    %% Distributed Link for Recombination
+    B -->|"DATABASE LINK: proj_link"| D
+    C -->|"DATABASE LINK: proj_link"| D
+
+```
 ## 🏗 System Architecture
 
 ```mermaid
